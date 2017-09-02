@@ -1,4 +1,6 @@
 <?php
 header("Content-Type:image/jpeg");
-echo file_get_contents("http://159.253.33.44/resim.php");
+$id = $_GET["id"];
+$link = "http://185.181.210.253/uploads/thumbs/'".$id."'-social.jpg";
+echo file_get_contents($link);
 ?>
